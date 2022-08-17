@@ -1,19 +1,21 @@
-# 사전 설정
+# 2일차 실습
 
-## 실행
+## 사전 확인
+
+### 실행
 
 ```bash
 $ sqlite3 healthcare.sqlite3 
 ```
 
-## Column 출력 설정
+### Column 출력 설정
 
 ```sql
 sqlite3> .headers on 
 sqlite3> .mode column
 ```
 
-## table 및 스키마 조회
+### table 및 스키마 조회
 
 ```sql
 sqlite3> .tables
@@ -21,24 +23,24 @@ healthcare
 
 sqlite3> .schema healthcare
 CREATE TABLE healthcare (
-id PRIMARY KEY,        
-sido INTEGER NOT NULL, 
-gender INTEGER NOT NULL,
-age INTEGER NOT NULL,  
-height INTEGER NOT NULL,
-weight INTEGER NOT NULL,
-waist REAL NOT NULL,   
-va_left REAL NOT NULL, 
-va_right REAL NOT NULL,
+    id PRIMARY KEY,        
+    sido INTEGER NOT NULL, 
+    gender INTEGER NOT NULL,
+    age INTEGER NOT NULL,  
+    height INTEGER NOT NULL,
+    weight INTEGER NOT NULL,
+    waist REAL NOT NULL,   
+    va_left REAL NOT NULL, 
+    va_right REAL NOT NULL,
 
-blood_pressure INTEGER 
-NOT NULL,
-smoking INTEGER NOT NULL,
-is_drinking BOOLEAN NOT NULL
+    blood_pressure INTEGER 
+    NOT NULL,
+    smoking INTEGER NOT NULL,
+    is_drinking BOOLEAN NOT NULL
 );
 ```
 
-# 문제
+## 문제
 
 ### 1. 추가되어 있는 모든 데이터의 수를 출력하시오.
 
@@ -47,51 +49,168 @@ SELECT COUNT(*) FROM healthcare;
 ```
 
 ```
-COUNT(*)
---------
 1000000
 ```
 
-### 2. 나이 그룹이 10(age)미만인 사람의 수를 출력하시오.
+### 2. 연령 코드(age)의 최대, 최소 값을 모두 출력하시오. 
 
 ```sql
+SELECT max(age), min(age) FROM healthcare;
 ```
 
 ```
+18,9
 ```
 
-### 3. 성별이 1인 사람의 수를 출력하시오.
-
-```sql
-```
-
-```
-```
-
-### 4. 흡연 수치(smoking)가 3이면서 음주(is_drinking)가 1인 사람의 수를 출력하시오.
+### 3. 신장(height)과 체중(weight)의 최대, 최소 값을 모두 출력하시오.
 
 ```sql
+SELECT max(height), min(height), max(weight), min(weight)FROM healthcare;
 ```
 
 ```
+195,130,135,30
 ```
 
-### 5. 양쪽 시력이(va_left, va_right) 모두 2.0이상인 사람의 수를 출력하시오.
-
-```sql
-```
-
-```
-```
-
-### 6. 시도(sido)를 모두 중복 없이 출력하시오.
+### 4. 신장(height)이 160이상 170이하인 사람은 몇 명인지 출력하시오.
 
 ```sql
+SELECT COUNT(height) FROM healthcare WHERE height>=160 and height<=170;
 ```
 
 ```
+516930
 ```
 
-### 자유롭게 조합해서 원하는 데이터를 출력해보세요.
+### 5. 음주(is_drinking)를 하는 사람(1)의 허리 둘레(waist)를 높은 순으로 5명 출력하시오. 
 
-> 예) 허리 둘레가 x이상이면서 몸무게가 y이하인 사람
+```sql
+SELECT waist FROM healthcare WHERE is_drinking=1 and not waist='' ORDER BY WAIST DESC LIMIT 5;
+```
+
+```
+146.0
+142.0
+141.4
+140.0
+140.0
+```
+
+### 6. 시력 양쪽(va_left, va_right)이 1.5이상이면서 음주(is_drinking)를 하는 사람의 수를 출력하시오.
+
+```sql
+SELECT COUNT(is_drinking) FROM healthcare WHERE va_left >= 1.5 and va_right >= 1.5 and is_drinking=1;
+```
+
+```
+36697
+```
+
+### 7. 혈압(blood_pressure)이 정상 범위(120미만)인 사람의 수를 출력하시오.
+
+```sql
+SELECT COUNT(blood_pressure) FROM healthcare WHERE blood_pressure<120;
+```
+
+```
+360808
+```
+
+### 8. 혈압(blood_pressure)이 140이상인 사람들의 평균 허리둘레(waist)를 출력하시오.
+
+```sql
+SELECT AVG(waist) FROM healthcare WHERE blood_pressure>=140;
+```
+
+```
+85.8665098512525
+```
+
+### 9. 성별(gender)이 1인 사람의 평균 키(height)와 평균 몸무게(weight)를 출력하시오.
+
+```sql
+SELECT AVG(height), AVG(weight) FROM healthcare WHERE gender=1;
+```
+
+```
+167.452735422145,69.7131620222875
+```
+
+### 10. 키가 가장 큰 사람 중에 두번째로 무거운 사람의 id와 키(height), 몸무게(weight)를 출력하시오.
+
+```sql
+SELECT id, height, weight FROM healthcare ORDER BY height DESC, weight DESC LIMIT 1 OFFSET 1;
+```
+
+```
+836005,195,110
+```
+
+### 11. BMI가 30이상인 사람의 수를 출력하시오. 
+
+> BMI는 체중/(키*키)의 계산 결과이다. 
+> 키는 미터 단위로 계산한다.
+
+```sql
+SELECT COUNT(*) FROM healthcare WHERE weight/(height*height*0.0001)>=30;
+```
+
+```
+53121
+```
+
+### 12. 흡연(smoking)이 3인 사람의 BMI지수가 제일 높은 사람 순서대로 5명의 id와 BMI를 출력하시오.
+
+> BMI는 체중/(키*키)의 계산 결과이다. 
+> 키는 미터 단위로 계산한다.
+
+```sql
+SELECT id, ROUND(weight/(height*height*0.0001)) AS BMI FROM healthcare WHERE smoking=3 ORDER BY BMI DESC LIMIT 5;
+```
+
+```
+231431,51.0
+934714,50.0
+722707,49.0
+947281,48.0
+948801,48.0
+```
+
+### 13. 음주를 하면서 혈압이 140이상이며 BMI가 30이상인 사람의 수를 출력하시오.
+
+```sql
+SELECT COUNT(*) FROM healthcare WHERE weight/(height*height*0.0001)>=30 and blood_pressure>=140 and is_drinking=1;
+```
+
+```
+7778
+```
+
+### 14. 흡연(smoking)이 3인 사람의 나이, 몸무게를 2번째 사람부터 5개 출력하시오.
+
+```sql
+SELECT age, weight FROM healthcare WHERE smoking=3 LIMIT 5 O
+FFSET 1;
+```
+
+```
+9,80
+13,65
+11,45
+14,80
+10,75
+```
+
+### 15. 왼쪽 시력이 2.0인 사람의 혈압, 오른쪽시력, 성별을 오른쪽시력 내림차순으로 5개 출력하시오.
+
+```sql
+SELECT blood_pressure, va_right, gender FROM healthcare WHERE va_left=2.0 ORDER BY va_right DESC LIMIT 5;
+```
+
+```
+113,9.9,1
+110,9.9,1
+106,9.9,1
+129,9.9,1
+136,9.9,1
+```
